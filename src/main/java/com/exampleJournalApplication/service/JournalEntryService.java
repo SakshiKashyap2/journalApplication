@@ -7,6 +7,7 @@ import com.exampleJournalApplication.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,13 +20,29 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository journalEntryRepository;
 
+    @Transactional
      public void saveEntry(JournalEntry journalEntry, String userName){
-         User user=userService.findByUserName(userName);
-         journalEntry.setDate(LocalDateTime.now());
-         JournalEntry saved=journalEntryRepository.save(journalEntry);
-         user.getJournalEntries().add(saved);
-         userService.saveUser(user);
+        try{
+            User user=userService.findByUserName(userName);
+            journalEntry.setDate(LocalDateTime.now());
+            JournalEntry saved=journalEntryRepository.save(journalEntry);
+            user.getJournalEntries().add(saved);
+            user.setUserName(null);
+            userService.saveUser(user);
+
+        }catch(Exception e){
+            System.out.println(e);
+            throw new RuntimeException("An error occured while saving the entry.",e);
+
+        }
      }
+
+
+    public void saveEntry(JournalEntry journalEntry){
+            journalEntry.setDate(LocalDateTime.now());
+            journalEntryRepository.save(journalEntry);
+
+    }
 
      public List<JournalEntry> getAll(){
          return journalEntryRepository.findAll();
@@ -36,13 +53,17 @@ public class JournalEntryService {
 
      }
 
-    public void deleteById(ObjectId myId){
+    public void deleteById(ObjectId myId , String userName){
+        User user=userService.findByUserName(userName);
+        user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
+        userService.saveUser(user);
         journalEntryRepository.deleteById(myId);
     }
 
     public void deleteAll(){
         journalEntryRepository.deleteAll();
     }
+
 
 
 }
