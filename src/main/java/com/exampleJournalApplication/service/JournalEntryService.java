@@ -20,14 +20,13 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository journalEntryRepository;
 
-    @Transactional
+
      public void saveEntry(JournalEntry journalEntry, String userName){
         try{
             User user=userService.findByUserName(userName);
             journalEntry.setDate(LocalDateTime.now());
             JournalEntry saved=journalEntryRepository.save(journalEntry);
             user.getJournalEntries().add(saved);
-            user.setUserName(null);
             userService.saveUser(user);
 
         }catch(Exception e){
