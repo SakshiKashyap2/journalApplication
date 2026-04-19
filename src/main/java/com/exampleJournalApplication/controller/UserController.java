@@ -1,9 +1,11 @@
 package com.exampleJournalApplication.controller;
 
+import com.exampleJournalApplication.api.response.WeatherResponse;
 import com.exampleJournalApplication.entity.JournalEntry;
 import com.exampleJournalApplication.entity.User;
 import com.exampleJournalApplication.repository.UserRepository;
 import com.exampleJournalApplication.service.UserService;
+import com.exampleJournalApplication.service.WeatherService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +30,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private WeatherService weatherService;
 
 
 //    @GetMapping
@@ -61,6 +66,20 @@ public class UserController {
         userRepository.deleteByUserName(authentication.getName());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+
+    }
+    @GetMapping
+    public ResponseEntity<?> greeting(){
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+        String userName=authentication.getName();
+        WeatherResponse weatherResponse = weatherService.getWeather("Mumbai");
+        String greeting="";
+        if(weatherResponse!=null){
+            greeting=", Weather feels like "+weatherResponse.getCurrent().getFeelslike();
+
+
+        }
+        return new ResponseEntity<>("Hi "+authentication.getName() + greeting  , HttpStatus.OK);
 
     }
 

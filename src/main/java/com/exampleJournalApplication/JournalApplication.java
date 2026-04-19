@@ -11,6 +11,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableTransactionManagement
@@ -26,6 +27,10 @@ public class JournalApplication {
 	public PlatformTransactionManager falana(MongoDatabaseFactory dbFactory ){
 		return new MongoTransactionManager(dbFactory);
 
+	}
+	@Bean
+	public RestTemplate restTemplate(){
+		return  new RestTemplate();
 	}
 }
 
