@@ -2,12 +2,15 @@ package com.exampleJournalApplication.controller;
 
 import com.exampleJournalApplication.entity.JournalEntry;
 import com.exampleJournalApplication.entity.User;
+import com.exampleJournalApplication.repository.UserRepository;
 import com.exampleJournalApplication.service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
@@ -23,40 +26,39 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers(){
 
-        return new ResponseEntity<>(userService.getAll(),HttpStatus.OK);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<User>> getAllUsers(){
+//
+//        return new ResponseEntity<>(userService.getAll(),HttpStatus.OK);
+//    }
 
 //    @GetMapping("/{id}")
 //    public ResponseEntity<Optional<User>> getUserById(@PathVariable ObjectId id){
 //        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
 //    }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user){
-        try{
-            userService.saveUser(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
 
-        } catch (Exception e) {
-            return new ResponseEntity<>(user, HttpStatus.BAD_REQUEST);
-
-        }
+    @PutMapping
+    public ResponseEntity<?> updateUser(@RequestBody User user){
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+        String userName=authentication.getName();
+        User userInDB= userService.findByUserName(userName);
+        userInDB.setUserName(user.getUserName());
+        userInDB.setPassword(user.getPassword());
+        userService.saveNewUser(userInDB);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 
     }
-    @PutMapping("/{userName}")
-    public ResponseEntity<?> updateUser(@RequestBody User user, @PathVariable String userName){
-        User userInDB= userService.findByUserName(userName);
-        if(userInDB!=null){
-            userInDB.setUserName(user.getUserName());
-            userInDB.setPassword(user.getPassword());
-            userService.saveUser(userInDB);
-            return new ResponseEntity<>(userInDB, HttpStatus.OK);
-        }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUserById(){
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+        userRepository.deleteByUserName(authentication.getName());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 
