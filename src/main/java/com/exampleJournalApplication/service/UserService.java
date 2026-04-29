@@ -12,13 +12,14 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Component
+@Service
 @Slf4j
 public  class UserService{
     @Autowired
